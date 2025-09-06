@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d351ecd3401d8e34babd6d28c86ce7f9, type: 3}
+  m_Name: UIPath
+  m_EditorClassIdentifier: 
+  uIInfos:
+  - name: InventoryViewPanel
+    uiType: 1
+    fadeType: 0
+    orderInLayer: 0
+    ecsRemovable: 0
+  - name: ImportantInfoConfirmPanel
+    uiType: 1
+    fadeType: 0
+    orderInLayer: 15
+    ecsRemovable: 1

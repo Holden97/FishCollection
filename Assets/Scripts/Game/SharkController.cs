@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Game
+namespace FishCollection
 {
     public class SharkController : MonoBehaviour
     {

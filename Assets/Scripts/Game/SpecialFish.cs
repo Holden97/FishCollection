@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Game
+namespace FishCollection
 {
     [RequireComponent(typeof(FishBoid))]
     public class SpecialFish : MonoBehaviour
