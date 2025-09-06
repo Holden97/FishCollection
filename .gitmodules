@@ -1,0 +1,6 @@
+[submodule "CommonBase"]
+	path = CommonBase
+	url = git@github.com:Holden97/CommonBase.git
+[submodule "Packages/CommonBase"]
+	path = Packages/CommonBase
+	url = git@github.com:Holden97/CommonBase.git
