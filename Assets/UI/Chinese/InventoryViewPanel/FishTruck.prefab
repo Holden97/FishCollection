@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 4435371398445818880}
   - component: {fileID: 5017041073666421255}
   - component: {fileID: 4243787715731451721}
+  - component: {fileID: 4657471014874592857}
+  - component: {fileID: 2406014495173576405}
   m_Layer: 5
   m_Name: FishTruck
   m_TagString: Untagged
@@ -75,3 +77,32 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &4657471014874592857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174276090963103459}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a888ef9e7ba4cfd8d027747ac4b6eb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fish:
+    fishId: 0
+    inventorySize: {x: 0, y: 0}
+    topLeftPos: {x: 0, y: 0}
+    fishColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!225 &2406014495173576405
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1174276090963103459}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0

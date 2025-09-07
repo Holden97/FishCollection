@@ -1,7 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace FishCollection
 {
+    [Serializable]
     public class SpecialFishCaught
     {
         public int fishId;
