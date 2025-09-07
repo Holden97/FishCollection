@@ -1,19 +1,24 @@
+using System;
 using System.Collections.Generic;
+using AYellowpaper.SerializedCollections;
 using CommonBase;
 using UnityEngine;
 
 namespace FishCollection
 {
-    public class BagSystem : Singleton<BagSystem>
+    public class BagSystem : MonoSingleton<BagSystem>
     {
         public Vector2Int bagSize;
-        public Dictionary<int, SpecialFishCaught> fishDic;
+
+        [SerializedDictionary("fishId", "Info")]
+        public SerializedDictionary<int, SpecialFishCaught> fishDic;
+
         private int[,] bagOccupancy;
 
-        private BagSystem()
+        private void Start()
         {
             bagSize = new Vector2Int(7, 6);
-            fishDic = new Dictionary<int, SpecialFishCaught>();
+            fishDic = new SerializedDictionary<int, SpecialFishCaught>();
             bagOccupancy = new int[bagSize.x, bagSize.y];
             for (int x = 0; x < bagSize.x; x++)
             for (int y = 0; y < bagSize.y; y++)
@@ -23,9 +28,8 @@ namespace FishCollection
             GameManager.Instance.RegisterOnFishEaten(AddFish);
         }
 
-        public override void Dispose()
+        private void OnDestroy()
         {
-            base.Dispose();
             GameManager.Instance.UnregisterOnFishEaten(AddFish);
         }
 
@@ -103,8 +107,10 @@ namespace FishCollection
             {
                 for (int y = startY; y < startY + gridSize.y; y++)
                 {
-                    if (x >= bagSize.x || y >= bagSize.y || bagOccupancy[x, y] != -1)
+                    if (x >= bagSize.x || y >= bagSize.y ||
+                        (bagOccupancy[x, y] != -1 && bagOccupancy[x, y] != fish.fishId))
                     {
+                        Debug.LogWarning("已占用");
                         return false; // 超出边界或已被占用
                     }
                 }
@@ -211,6 +217,11 @@ namespace FishCollection
             int startX = (int)targetGridPosition.x;
             int startY = (int)targetGridPosition.y;
 
+            if (!IsValidGridPosition(targetGridPosition))
+            {
+                return null;
+            }
+
             for (int x = startX; x < startX + 1; x++)
             {
                 for (int y = startY; y < startY + 1; y++)
@@ -227,6 +238,15 @@ namespace FishCollection
             }
 
             return null;
+        }
+
+        public bool IsValidGridPosition(Vector2 endGridPosition)
+        {
+            int x = (int)endGridPosition.x;
+            int y = (int)endGridPosition.y;
+
+            // 检查网格位置是否在背包的有效范围内
+            return x >= 0 && x < bagSize.x && y >= 0 && y < bagSize.y;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace FishCollection
         private Vector3 originalPosition; // 拖动开始时的位置
         private Vector3 mouseOffset; // 鼠标与鱼的相对位置
         private GameObject previewFish; // 预览的鱼
+        private GameObject previewFishAtTarget; // 目标位置预览鱼
 
         private void Awake()
         {
@@ -93,11 +94,12 @@ namespace FishCollection
             if (draggingView != null)
             {
                 draggingView.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = false;
-                draggingView.gameObject.SetActive(false); // 隐藏原鱼`
-                previewFish = Instantiate(fishTruckPrefab, Viewport.transform);
+                draggingView.gameObject.SetActive(false); // 隐藏原鱼
+                previewFish = Instantiate(fishTruckPrefab, transform);
                 previewFish.transform.localScale = draggingView.fish.inventorySize.To3();
                 previewFish.transform.GetComponent<Image>().color = draggingView.fish.fishColor;
                 previewFish.GetComponent<CanvasGroup>().alpha = 0.5f; // 设置透明度
+                previewFishAtTarget = null; // 初始化目标位置预览鱼
             }
         }
 
@@ -105,23 +107,86 @@ namespace FishCollection
         {
             if (previewFish != null)
             {
-                Vector3 newPosition = Input.mousePosition + mouseOffset;
-                previewFish.transform.position = newPosition;
+                Vector3 fishPosition = Input.mousePosition + mouseOffset;
+                var currentGridPosition = GetScreen2CurrentGridPosition(fishPosition);
+                bool gridPosIsValid = BagSystem.Instance.IsValidGridPosition(currentGridPosition);
+                previewFishAtTarget?.gameObject.SetActive(gridPosIsValid);
+                previewFish.transform.position = fishPosition;
+                if (!gridPosIsValid)
+                {
+                    return;
+                }
+
+                // 检查当前位置是否可以放置鱼
+                if (BagSystem.Instance.CanFitFish(draggingView.fish, currentGridPosition))
+                {
+                    // 可以放置，显示目标位置预览鱼
+                    if (previewFishAtTarget == null)
+                    {
+                        previewFishAtTarget = Instantiate(fishTruckPrefab, Viewport.transform);
+                        previewFishAtTarget.transform.localScale = draggingView.fish.inventorySize.To3();
+                        previewFishAtTarget.transform.GetComponent<Image>().color = draggingView.fish.fishColor;
+                        previewFishAtTarget.GetComponent<CanvasGroup>().alpha = 0.5f; // 设置透明度
+                    }
+
+                    previewFishAtTarget.transform.localPosition = new Vector3((int)currentGridPosition.x * 100,
+                        ((int)-currentGridPosition.y) * 100, 0);
+                }
+                else
+                {
+                    // 不能放置，隐藏目标位置预览鱼
+                    if (previewFishAtTarget != null)
+                    {
+                        Destroy(previewFishAtTarget);
+                        previewFishAtTarget = null;
+                    }
+                }
             }
+        }
+
+        private Vector2 GetScreen2CurrentGridPosition(Vector3 newPosition)
+        {
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                Viewport.GetComponent<RectTransform>(),
+                newPosition,
+                null,
+                out var localPoint);
+            Vector2 currentGridPosition = new Vector2Int((int)(localPoint.x / 100), (int)(-localPoint.y / 100));
+            return currentGridPosition;
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
             if (draggingView != null)
             {
-                TryPlaceOrSwap(draggingView);
+                // 检查拖拽结束时的位置是否有效
+                Vector3 endPosition = Input.mousePosition + mouseOffset;
+                Vector2 endGridPosition = GetScreen2CurrentGridPosition(endPosition);
+
+                if (!BagSystem.Instance.IsValidGridPosition(endGridPosition))
+                {
+                    // 如果结束位置无效，则触发丢弃逻辑
+                    BagSystem.Instance.RemoveFish(draggingView.fish);
+                }
+                else
+                {
+                    TryPlaceOrSwap(draggingView);
+                }
+
                 if (previewFish != null)
                 {
                     Destroy(previewFish);
                 }
 
+                if (previewFishAtTarget != null)
+                {
+                    Destroy(previewFishAtTarget);
+                }
+
                 draggingView.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = true;
                 draggingView.gameObject.SetActive(true); // 显示原鱼
+
+
                 draggingView = null;
             }
         }
@@ -129,7 +194,7 @@ namespace FishCollection
         private void TryPlaceOrSwap(SpecialFishCaughtView fishToMove)
         {
             // 获取目标位置
-            Vector3 targetPosition = previewFish.transform.localPosition;
+            Vector3 targetPosition = Viewport.transform.InverseTransformPoint(previewFish.transform.position);
             Vector2 targetGridPosition = new Vector2(targetPosition.x / 100, -targetPosition.y / 100);
 
             // 检查目标位置是否为空闲

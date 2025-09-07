@@ -16,7 +16,8 @@ namespace FishCollection
             base.OnStateUpdate();
             if (Input.GetKeyDown(toggleKey))
             {
-                UIManager.Instance.SwitchPanel<InventoryViewPanel>();
+                bool openWindow = UIManager.Instance.SwitchPanel<InventoryViewPanel>();
+                Time.timeScale = openWindow ? 0f : 1f;
             }
         }
 

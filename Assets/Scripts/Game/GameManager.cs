@@ -54,7 +54,6 @@ namespace FishCollection
         void SetupGame()
         {
             CreateShark();
-            BagSystem.Instance.Initialize();
             gameFSM = new FiniteStateMachine(gameFSMSO);
             gameFSM.Start();
         }
