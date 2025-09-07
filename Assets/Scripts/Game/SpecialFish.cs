@@ -14,9 +14,15 @@ namespace FishCollection
         [SerializeField] private float speedMultiplier = 2f;
         [SerializeField] private float brightnesBoost = 0.3f;
         [SerializeField] private bool glowEffect = true;
-        
+
+        public Vector2Int InventoryGridSize => inventoryGridSize;
+        public Color fishBaseColor;
+        public int specialFishId;
+
+
         void Awake()
         {
+            specialFishId = GameManager.FishIdSeed++;
             // Randomize grid size if enabled
             if (randomizeGridSize)
             {
@@ -53,6 +59,7 @@ namespace FishCollection
             if (renderer != null)
             {
                 Color currentColor = renderer.material.color;
+                fishBaseColor = currentColor;
                 
                 // Convert to HSV to increase brightness
                 Color.RGBToHSV(currentColor, out float h, out float s, out float v);

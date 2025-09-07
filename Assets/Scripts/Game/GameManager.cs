@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 namespace FishCollection
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoSingleton<GameManager>
     {
         [Header("Game Settings")] [SerializeField]
         private float fieldSize = 50f;
@@ -30,19 +30,31 @@ namespace FishCollection
 
         [Header("Game State")] public FSMSO gameFSMSO;
         private FiniteStateMachine gameFSM;
+        public static int FishIdSeed = 0;
 
         public System.Action<int> OnFishCountUpdate;
 
         void Start()
         {
+            OnLoadGame();
             SetupGame();
             StartGame();
+        }
+
+        public void OnLoadGame()
+        {
+            FishIdSeed = PlayerPrefs.GetInt("fishSeed", 1);
+        }
+
+        public void OnSaveGame()
+        {
+            PlayerPrefs.SetInt("fishSeed", FishIdSeed);
         }
 
         void SetupGame()
         {
             CreateShark();
-            
+            BagSystem.Instance.Initialize();
             gameFSM = new FiniteStateMachine(gameFSMSO);
             gameFSM.Start();
         }
@@ -58,6 +70,16 @@ namespace FishCollection
             }
 
             shark.OnFishEaten += OnFishEaten;
+        }
+
+        public void RegisterOnFishEaten(Action<SpecialFish> obj)
+        {
+            shark.HandleFishEaten += obj;
+        }
+
+        public void UnregisterOnFishEaten(Action<SpecialFish> obj)
+        {
+            shark.HandleFishEaten -= obj;
         }
 
         public void StartGame()
@@ -139,6 +161,11 @@ namespace FishCollection
         private void Update()
         {
             gameFSM.Update();
+        }
+
+        private void OnDestroy()
+        {
+            this.OnSaveGame();
         }
     }
 }

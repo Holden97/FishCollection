@@ -342,6 +342,10 @@ namespace FishCollection
         
         public void GetEaten()
         {
+            if (GetComponent<SpecialFish>() != null)
+            {
+                Debug.Log("特殊鱼被吃掉了！");
+            }
             isEaten = true;
             allFish.Remove(this);
             Destroy(gameObject);
