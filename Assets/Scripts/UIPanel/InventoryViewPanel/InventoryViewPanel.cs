@@ -32,13 +32,15 @@ namespace FishCollection
             UpdateView(null);
         }
 
+        public override void Initialize()
+        {
+            base.Initialize();
+            fishViews = new SerializedDictionary<SpecialFishCaught, GameObject>();
+        }
+
         public override void UpdateView(object o)
         {
             base.UpdateView(o);
-            if (fishViews == null)
-            {
-                fishViews = new SerializedDictionary<SpecialFishCaught, GameObject>();
-            }
 
             var fishToRemove = fishViews.Keys.Except(BagSystem.Instance.fishDic.Values).ToList();
 

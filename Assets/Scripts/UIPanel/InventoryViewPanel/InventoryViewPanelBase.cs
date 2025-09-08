@@ -16,7 +16,6 @@ namespace FishCollection
 
         public override void Initialize()
         {
-            base.Initialize();
             InventoryView = transform.Find("InventoryView").GetComponent<Image>();
             Viewport = transform.Find("InventoryView/Viewport").GetComponent<Image>();
             Capcity = transform.Find("Capcity").GetComponent<TextMeshProUGUI>();

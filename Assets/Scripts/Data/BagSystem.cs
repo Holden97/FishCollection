@@ -55,12 +55,11 @@ namespace FishCollection
                         // 将鱼添加到列表中
                         fishDic.Add(fish.specialFishId, new SpecialFishCaught(fish, new Vector2Int(x, y)));
                         this.EventTrigger(GameEvent.BagChange);
+                        occupancyCount += fish.InventoryGridSize.x * fish.InventoryGridSize.y;
                         return;
                     }
                 }
             }
-
-            occupancyCount += fish.InventoryGridSize.x * fish.InventoryGridSize.y;
         }
 
         public bool RemoveFish(SpecialFishCaught fish)
@@ -73,9 +72,8 @@ namespace FishCollection
             ClearOccupiedArea(fishDic[fish.fishId].topLeftPos, fishDic[fish.fishId].inventorySize);
             // 从列表中移除鱼
             fishDic.Remove(fish.fishId);
-            this.EventTrigger(GameEvent.BagChange);
             occupancyCount -= fish.inventorySize.x * fish.inventorySize.y;
-
+            this.EventTrigger(GameEvent.BagChange);
             return true;
         }
 
