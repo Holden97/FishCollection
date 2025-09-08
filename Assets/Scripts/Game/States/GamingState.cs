@@ -21,6 +21,13 @@ namespace FishCollection
             }
         }
 
+        public override async void OnStateStart()
+        {
+            base.OnStateStart();
+            await UIManager.Instance.LoadUIAssetAsync();
+            UIManager.Instance.ShowPanel<MiniMapPanel>();
+        }
+
         // public void ToggleInventory()
         // {
         //     !isInventoryOpen;

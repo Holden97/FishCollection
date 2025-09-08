@@ -23,6 +23,7 @@ namespace FishCollection
         [SerializeField] private GameObject fishPrefab;
 
         private SharkController shark;
+        public SharkController Shark => shark;
         private List<FishBoid> allFish = new List<FishBoid>();
         private GameObject field;
         private bool isGameActive;
