@@ -117,8 +117,15 @@ namespace FishCollection
                     return;
                 }
 
+                SpecialFishCaught fishAtTarget = BagSystem.Instance.GetFishAtPosition(currentGridPosition);
+                List<int> excludedFishList = new List<int>();
+                if (fishAtTarget != null)
+                {
+                    excludedFishList.Add(fishAtTarget.fishId);
+                }
+
                 // 检查当前位置是否可以放置鱼
-                if (BagSystem.Instance.CanFitFish(draggingView.fish, currentGridPosition))
+                if (BagSystem.Instance.CanFitFish(draggingView.fish, currentGridPosition, excludedFishList))
                 {
                     // 可以放置，显示目标位置预览鱼
                     if (previewFishAtTarget == null)
@@ -195,7 +202,8 @@ namespace FishCollection
         {
             // 获取目标位置
             Vector3 targetPosition = Viewport.transform.InverseTransformPoint(previewFish.transform.position);
-            Vector2 targetGridPosition = new Vector2(targetPosition.x / 100, -targetPosition.y / 100);
+            Vector2Int targetGridPosition =
+                new Vector2Int((int)(targetPosition.x / 100), (int)(-targetPosition.y / 100));
 
             // 检查目标位置是否为空闲
             if (BagSystem.Instance.CanFitFish(fishToMove.fish, targetGridPosition))
@@ -207,12 +215,35 @@ namespace FishCollection
             {
                 // 目标位置不空闲，尝试交换
                 SpecialFishCaught fishAtTarget = BagSystem.Instance.GetFishAtPosition(targetGridPosition);
-                if (fishAtTarget != null && BagSystem.Instance.CanFitFish(fishToMove.fish, targetGridPosition))
+                
+                if (fishAtTarget != null && BagSystem.Instance.CanFitFish(fishToMove.fish, targetGridPosition,
+                                             new List<int>() { fishAtTarget.fishId })
+                                         && BagSystem.Instance.CanFitFish(fishAtTarget, fishToMove.fish.topLeftPos,
+                                             new List<int>() { fishToMove.fish.fishId }))
                 {
                     // 交换位置
-                    BagSystem.Instance.SwapFish(fishToMove.fish, fishAtTarget);
+                    BagSystem.Instance.SwapFish(fishToMove.fish, fishAtTarget, targetGridPosition);
                 }
             }
+        }
+
+        #endregion
+
+        #region imgui调试
+
+        private void OnGUI()
+        {
+            GUILayout.BeginVertical();
+            for (int r = 0; r < BagSystem.Instance.bagOccupancy.GetLength(1); r++)
+            {
+                GUILayout.BeginHorizontal();
+                for (int c = 0; c <  BagSystem.Instance.bagOccupancy.GetLength(0); c++)
+                {
+                    GUILayout.Label(BagSystem.Instance.bagOccupancy[c, r].ToString(), GUILayout.Width(40));
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.EndVertical();
         }
 
         #endregion

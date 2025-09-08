@@ -13,7 +13,7 @@ namespace FishCollection
         [SerializedDictionary("fishId", "Info")]
         public SerializedDictionary<int, SpecialFishCaught> fishDic;
 
-        private int[,] bagOccupancy;
+        public int[,] bagOccupancy;
 
         private void Start()
         {
@@ -30,7 +30,7 @@ namespace FishCollection
 
         private void OnDestroy()
         {
-            GameManager.Instance.UnregisterOnFishEaten(AddFish);
+            GameManager.Instance?.UnregisterOnFishEaten(AddFish);
         }
 
         public void AddFish(SpecialFish fish)
@@ -48,10 +48,11 @@ namespace FishCollection
                     if (CanPlaceFishAt(fish, x, y))
                     {
                         // 标记这些格子为已占用
-                        MarkOccupied(fish, x, y);
+                        MarkOccupied(fish, x, y, bagOccupancy);
 
                         // 将鱼添加到列表中
                         fishDic.Add(fish.specialFishId, new SpecialFishCaught(fish, new Vector2Int(x, y)));
+                        this.EventTrigger(GameEvent.BagChange);
                         return;
                     }
                 }
@@ -68,6 +69,7 @@ namespace FishCollection
             ClearOccupiedArea(fishDic[fish.fishId].topLeftPos, fishDic[fish.fishId].inventorySize);
             // 从列表中移除鱼
             fishDic.Remove(fish.fishId);
+            this.EventTrigger(GameEvent.BagChange);
 
             return true;
         }
@@ -79,6 +81,28 @@ namespace FishCollection
                 for (int y = startPos.y; y < startPos.y + gridSize.y; y++)
                 {
                     bagOccupancy[x, y] = -1; // 清空格子
+                }
+            }
+        }
+
+        private void ClearOccupiedArea(SpecialFishCaught fish)
+        {
+            for (int x = fish.topLeftPos.x; x < fish.inventorySize.x + fish.topLeftPos.x; x++)
+            {
+                for (int y = fish.topLeftPos.y; y < fish.inventorySize.y + fish.topLeftPos.y; y++)
+                {
+                    bagOccupancy[x, y] = -1;
+                }
+            }
+        }
+
+        private void ClearOccupiedArea(SpecialFishCaught fish, int[,] bag)
+        {
+            for (int x = fish.topLeftPos.x; x < fish.inventorySize.x + fish.topLeftPos.x; x++)
+            {
+                for (int y = fish.topLeftPos.y; y < fish.inventorySize.y + fish.topLeftPos.y; y++)
+                {
+                    bag[x, y] = -1;
                 }
             }
         }
@@ -119,7 +143,51 @@ namespace FishCollection
             return true; // 可以放置
         }
 
-        private void MarkOccupied(SpecialFish fish, int startX, int startY)
+        private bool CanPlaceFishAt(SpecialFishCaught fish, int startX, int startY, List<int> excluded)
+        {
+            Vector2Int gridSize = fish.inventorySize;
+            for (int x = startX; x < startX + gridSize.x; x++)
+            {
+                for (int y = startY; y < startY + gridSize.y; y++)
+                {
+                    if (x >= bagSize.x || y >= bagSize.y ||
+                        (bagOccupancy[x, y] != -1 && bagOccupancy[x, y] != fish.fishId &&
+                         !excluded.Contains(bagOccupancy[x, y])))
+                    {
+                        Debug.LogWarning("已占用");
+                        return false; // 超出边界或已被占用
+                    }
+                }
+            }
+
+            return true; // 可以放置
+        }
+
+        private bool CanPlaceFishAtSuppose(SpecialFishCaught fish, int startX, int startY, SpecialFishCaught fishSwap)
+        {
+            int[,] bagOccupancyCopy = ArrayExtension.CopyArray(bagOccupancy);
+            ClearOccupiedArea(fish, bagOccupancyCopy);
+            ClearOccupiedArea(fishSwap, bagOccupancyCopy);
+
+            MarkOccupied(fishSwap, fish.topLeftPos.x, fish.topLeftPos.y, bagOccupancyCopy);
+            Vector2Int gridSize = fish.inventorySize;
+            for (int x = startX; x < startX + gridSize.x; x++)
+            {
+                for (int y = startY; y < startY + gridSize.y; y++)
+                {
+                    if (x >= bagSize.x || y >= bagSize.y ||
+                        (bagOccupancyCopy[x, y] != -1 && bagOccupancyCopy[x, y] != fish.fishId))
+                    {
+                        Debug.LogWarning("已占用");
+                        return false; // 超出边界或已被占用
+                    }
+                }
+            }
+
+            return true; // 可以放置
+        }
+
+        private void MarkOccupied(SpecialFish fish, int startX, int startY, int[,] bag)
         {
             int index = fish.specialFishId;
             Vector2Int gridSize = fish.InventoryGridSize;
@@ -127,12 +195,12 @@ namespace FishCollection
             {
                 for (int y = startY; y < startY + gridSize.y; y++)
                 {
-                    bagOccupancy[x, y] = index;
+                    bag[x, y] = index;
                 }
             }
         }
 
-        private void MarkOccupied(SpecialFishCaught fish, int startX, int startY)
+        private void MarkOccupied(SpecialFishCaught fish, int startX, int startY, int[,] bag)
         {
             int index = fish.fishId;
             Vector2Int gridSize = fish.inventorySize;
@@ -140,7 +208,7 @@ namespace FishCollection
             {
                 for (int y = startY; y < startY + gridSize.y; y++)
                 {
-                    bagOccupancy[x, y] = index;
+                    bag[x, y] = index;
                 }
             }
         }
@@ -184,6 +252,20 @@ namespace FishCollection
             return CanPlaceFishAt(fish, startX, startY);
         }
 
+        public bool CanFitFish(SpecialFishCaught fish, Vector2 targetGridPosition, List<int> excluded)
+        {
+            int startX = (int)targetGridPosition.x;
+            int startY = (int)targetGridPosition.y;
+            return CanPlaceFishAt(fish, startX, startY, excluded);
+        }
+
+        public bool CanFitFishSuppose(SpecialFishCaught fish, Vector2 targetGridPosition, SpecialFishCaught fishToSwap)
+        {
+            int startX = (int)targetGridPosition.x;
+            int startY = (int)targetGridPosition.y;
+            return CanPlaceFishAtSuppose(fish, startX, startY, fishToSwap);
+        }
+
         // 移动鱼到目标位置
         public void MoveFish(SpecialFishCaught fishToMove, Vector2 targetGridPosition)
         {
@@ -193,20 +275,32 @@ namespace FishCollection
             if (CanFitFish(fishToMove, targetGridPosition))
             {
                 ClearOccupiedArea(fishToMove.topLeftPos, fishToMove.inventorySize);
-                MarkOccupied(fishToMove, startX, startY);
+                MarkOccupied(fishToMove, startX, startY, bagOccupancy);
                 fishToMove.topLeftPos = new Vector2Int(startX, startY);
                 this.EventTrigger(GameEvent.BagChange);
             }
         }
 
-        // 交换两条鱼的位置
-        public void SwapFish(SpecialFishCaught fishToMove, SpecialFishCaught fishAtTarget)
+        private void MoveFishDirectly(SpecialFishCaught fishToMove, Vector2 targetGridPosition)
         {
-            if (CanFitFish(fishToMove, fishAtTarget.topLeftPos) && CanFitFish(fishAtTarget, fishToMove.topLeftPos))
+            int startX = (int)targetGridPosition.x;
+            int startY = (int)targetGridPosition.y;
+
+            MarkOccupied(fishToMove, startX, startY, bagOccupancy);
+            fishToMove.topLeftPos = new Vector2Int(startX, startY);
+        }
+
+        // 交换两条鱼的位置
+        public void SwapFish(SpecialFishCaught fishToMove, SpecialFishCaught fishAtTarget, Vector2Int targetPos)
+        {
+            if (CanFitFishSuppose(fishToMove, fishAtTarget.topLeftPos, fishAtTarget)
+                && CanFitFishSuppose(fishAtTarget, fishToMove.topLeftPos, fishToMove))
             {
                 Vector2Int tempPosition = fishToMove.topLeftPos;
-                MoveFish(fishToMove, fishAtTarget.topLeftPos);
-                MoveFish(fishAtTarget, tempPosition);
+                ClearOccupiedArea(fishToMove.topLeftPos, fishToMove.inventorySize);
+                ClearOccupiedArea(fishAtTarget.topLeftPos, fishAtTarget.inventorySize);
+                MoveFishDirectly(fishToMove, targetPos);
+                MoveFishDirectly(fishAtTarget, tempPosition);
                 this.EventTrigger(GameEvent.BagChange);
             }
         }
