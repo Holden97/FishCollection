@@ -18,6 +18,8 @@ TagManager:
   - Wood
   - Fish
   - Shark
+  - UICanvas
+  - SelectionArea
   layers:
   - Default
   - TransparentFX

@@ -23,6 +23,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - UI_Chinese
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6b45e3ce55803414f80d653cf4ca1a6a
+    m_Address: Assets/UI/Chinese/BHP_red.png
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI_Chinese
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a3b4b26070042064ea9e2b36a054cd82, type: 2}
   m_SchemaSet:
