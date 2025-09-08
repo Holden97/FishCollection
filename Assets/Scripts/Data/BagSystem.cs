@@ -9,6 +9,7 @@ namespace FishCollection
     public class BagSystem : MonoSingleton<BagSystem>
     {
         public Vector2Int bagSize;
+        private int occupancyCount;
 
         [SerializedDictionary("fishId", "Info")]
         public SerializedDictionary<int, SpecialFishCaught> fishDic;
@@ -17,6 +18,7 @@ namespace FishCollection
 
         private void Start()
         {
+            occupancyCount = 0;
             bagSize = new Vector2Int(7, 6);
             fishDic = new SerializedDictionary<int, SpecialFishCaught>();
             bagOccupancy = new int[bagSize.x, bagSize.y];
@@ -57,6 +59,8 @@ namespace FishCollection
                     }
                 }
             }
+
+            occupancyCount += fish.InventoryGridSize.x * fish.InventoryGridSize.y;
         }
 
         public bool RemoveFish(SpecialFishCaught fish)
@@ -70,6 +74,7 @@ namespace FishCollection
             // 从列表中移除鱼
             fishDic.Remove(fish.fishId);
             this.EventTrigger(GameEvent.BagChange);
+            occupancyCount -= fish.inventorySize.x * fish.inventorySize.y;
 
             return true;
         }
@@ -341,6 +346,16 @@ namespace FishCollection
 
             // 检查网格位置是否在背包的有效范围内
             return x >= 0 && x < bagSize.x && y >= 0 && y < bagSize.y;
+        }
+
+        public int GetCapcity()
+        {
+            return bagOccupancy.Length;
+        }
+
+        public int GetOccupancy()
+        {
+            return occupancyCount;
         }
     }
 }

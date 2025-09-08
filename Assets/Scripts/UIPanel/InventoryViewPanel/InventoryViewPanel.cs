@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AYellowpaper.SerializedCollections;
 using CodiceApp.EventTracking.Plastic;
 using UnityEngine;
 using CommonBase;
@@ -13,19 +14,13 @@ namespace FishCollection
         IEndDragHandler
     {
         public GameObject fishTruckPrefab;
-        public Dictionary<SpecialFishCaught, GameObject> viewFishInstances;
+        public SerializedDictionary<SpecialFishCaught, GameObject> fishViews;
 
         private SpecialFishCaughtView draggingView; // 正在被拖动的鱼
         private Vector3 originalPosition; // 拖动开始时的位置
         private Vector3 mouseOffset; // 鼠标与鱼的相对位置
         private GameObject previewFish; // 预览的鱼
         private GameObject previewFishAtTarget; // 目标位置预览鱼
-
-        private void Awake()
-        {
-            Viewport = transform.Find("Viewport").GetComponent<Image>();
-            viewFishInstances = new Dictionary<SpecialFishCaught, GameObject>();
-        }
 
         private void OnEnable()
         {
@@ -40,26 +35,31 @@ namespace FishCollection
         public override void UpdateView(object o)
         {
             base.UpdateView(o);
-            var fishToRemove = viewFishInstances.Keys.Except(BagSystem.Instance.fishDic.Values).ToList();
+            if (fishViews == null)
+            {
+                fishViews = new SerializedDictionary<SpecialFishCaught, GameObject>();
+            }
+
+            var fishToRemove = fishViews.Keys.Except(BagSystem.Instance.fishDic.Values).ToList();
 
             foreach (var fish in fishToRemove)
             {
-                Destroy(viewFishInstances[fish]);
-                viewFishInstances.Remove(fish);
+                Destroy(fishViews[fish]);
+                fishViews.Remove(fish);
             }
 
             foreach (var fishKV in BagSystem.Instance.fishDic)
             {
                 GameObject instance = default;
-                if (viewFishInstances.ContainsKey(fishKV.Value))
+                if (fishViews.ContainsKey(fishKV.Value))
                 {
-                    instance = viewFishInstances[fishKV.Value];
+                    instance = fishViews[fishKV.Value];
                 }
                 else
                 {
                     instance = Instantiate(fishTruckPrefab, Viewport.transform);
                     instance.GetComponent<SpecialFishCaughtView>().SetFish(fishKV.Value);
-                    viewFishInstances.Add(fishKV.Value, instance);
+                    fishViews.Add(fishKV.Value, instance);
                 }
 
                 instance.transform.localPosition = new Vector3(fishKV.Value.topLeftPos.x * 100,
@@ -67,6 +67,9 @@ namespace FishCollection
                 instance.transform.localScale = fishKV.Value.inventorySize.To3();
                 instance.transform.GetComponent<Image>().color = fishKV.Value.fishColor;
             }
+
+            Capcity_1.text = BagSystem.Instance.GetCapcity().ToString();
+            Occupy_2.text = BagSystem.Instance.GetOccupancy().ToString();
         }
 
         #region 交互部分
@@ -74,9 +77,9 @@ namespace FishCollection
         public void OnPointerDown(PointerEventData eventData)
         {
             var hit = eventData.pointerCurrentRaycast.gameObject;
-            if (hit != null && viewFishInstances.Values.Contains(hit))
+            if (hit != null && fishViews.Values.Contains(hit))
             {
-                foreach (var item in viewFishInstances)
+                foreach (var item in fishViews)
                 {
                     if (item.Value == hit)
                     {
@@ -215,7 +218,7 @@ namespace FishCollection
             {
                 // 目标位置不空闲，尝试交换
                 SpecialFishCaught fishAtTarget = BagSystem.Instance.GetFishAtPosition(targetGridPosition);
-                
+
                 if (fishAtTarget != null && BagSystem.Instance.CanFitFish(fishToMove.fish, targetGridPosition,
                                              new List<int>() { fishAtTarget.fishId })
                                          && BagSystem.Instance.CanFitFish(fishAtTarget, fishToMove.fish.topLeftPos,
@@ -237,12 +240,14 @@ namespace FishCollection
             for (int r = 0; r < BagSystem.Instance.bagOccupancy.GetLength(1); r++)
             {
                 GUILayout.BeginHorizontal();
-                for (int c = 0; c <  BagSystem.Instance.bagOccupancy.GetLength(0); c++)
+                for (int c = 0; c < BagSystem.Instance.bagOccupancy.GetLength(0); c++)
                 {
                     GUILayout.Label(BagSystem.Instance.bagOccupancy[c, r].ToString(), GUILayout.Width(40));
                 }
+
                 GUILayout.EndHorizontal();
             }
+
             GUILayout.EndVertical();
         }
 
