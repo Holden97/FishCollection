@@ -9,21 +9,30 @@ namespace FishCollection
 {
     public class HpBar : MonoBehaviour
     {
-        public float duration = 1f;
         public FishBoid fishBoid;
         public Image hpBarImg;
         public CanvasGroup hpCanvasGroup;
+        public Coroutine hpCoroutine;
 
         private void OnEnable()
         {
             hpCanvasGroup.alpha = 0;
-            StartCoroutine(FadeIn());
+        }
+
+        public Coroutine ShowHpBar()
+        {
+            return StartCoroutine(Fade(1, 1));
         }
 
         private void Update()
         {
             transform.rotation = Camera.main.transform.rotation;
             hpBarImg.fillAmount = fishBoid.hpPercent;
+            if (hpBarImg.fillAmount < 1 && hpBarImg.fillAmount > 0 && hpCoroutine == null && !Mathf.Approximately(hpCanvasGroup.alpha, 1f))
+            {
+                hpCoroutine = ShowHpBar();
+            }
+
             if (hpBarImg.fillAmount < 0.3f)
             {
                 hpBarImg.color = Color.red;
@@ -40,7 +49,7 @@ namespace FishCollection
 
 
         // 渐显方法
-        private IEnumerator FadeIn()
+        private IEnumerator Fade(float targetAlpha, float duration)
         {
             if (hpCanvasGroup == null)
             {
@@ -52,36 +61,12 @@ namespace FishCollection
             while (elapsedTime < duration)
             {
                 elapsedTime += Time.deltaTime;
-                float alpha = Mathf.Lerp(0, 1, elapsedTime / duration);
+                float alpha = Mathf.Lerp(0, targetAlpha, elapsedTime / duration);
                 hpCanvasGroup.alpha = alpha;
                 yield return null;
             }
 
-            // 确保最终透明度为1
-            hpCanvasGroup.alpha = 1;
-        }
-
-
-        // 渐隐方法
-        private IEnumerator FadeOut()
-        {
-            if (hpCanvasGroup == null)
-            {
-                yield break;
-            }
-
-            float elapsedTime = 0f;
-
-            while (elapsedTime < duration)
-            {
-                elapsedTime += Time.deltaTime;
-                float alpha = Mathf.Lerp(1, 0, elapsedTime / duration);
-                hpCanvasGroup.alpha = alpha;
-                yield return null;
-            }
-
-            // 确保最终透明度为0
-            hpCanvasGroup.alpha = 0;
+            hpCoroutine = null;
         }
     }
 }
