@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 3989143143638582193}
   - component: {fileID: 2253968129499733532}
   - component: {fileID: 589739611411523954}
+  - component: {fileID: 6246708016146733069}
   m_Layer: 5
   m_Name: MainGameHudPanel
   m_TagString: Untagged
@@ -214,6 +215,22 @@ MonoBehaviour:
   Button: {fileID: 0}
   Text__TMP_: {fileID: 0}
   fishImg: {fileID: 5750156761224087575, guid: fb8737017499d8e4f90838ebe5e0df5b, type: 3}
+--- !u!114 &6246708016146733069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590149204173121456}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 330d38615c0c4e2ebc27ea4493ac63f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  duration: 0.6
+  easeTypeIn: 27
+  easeTypeOut: 26
+  hiddenOffset: {x: 0, y: 500}
 --- !u!1 &8761969028459698777
 GameObject:
   m_ObjectHideFlags: 0

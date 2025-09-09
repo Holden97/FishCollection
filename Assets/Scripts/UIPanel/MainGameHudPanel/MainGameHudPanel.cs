@@ -58,7 +58,7 @@ namespace FishCollection
             rt.localPosition = uiPos;
             rt.localScale = Vector3.one * 0.5f;
             // 4. 飞行动画 + 缩放 + 渐隐
-            Sequence seq = DOTween.Sequence();
+            Sequence seq = DOTween.Sequence().SetUpdate(true);
             seq.Append(rt.DOScale(1.2f, .1f).SetEase(Ease.OutBack)) // 放大动画
                 .Append(rt.DOScale(0.8f, .1f)) // 缩小
                 .Join(rt.DOLocalMove(this.Button.transform.localPosition, .5f).SetEase(Ease.InQuad))
@@ -69,11 +69,6 @@ namespace FishCollection
 
                     // 5. targetUI 弹动效果
                     this.Button.transform.DOPunchScale(Vector3.one * 0.3f, .5f, 1, 0.5f);
-                    // 参数说明：
-                    // Vector3.one*0.3f：弹动幅度
-                    // targetBounceDuration：动画时间
-                    // 1：振动次数
-                    // 0.5f：弹性张力
                 });
         }
     }

@@ -109,10 +109,17 @@ namespace FishCollection
                 draggingView.gameObject.GetComponent<CanvasGroup>().blocksRaycasts = false;
                 draggingView.gameObject.SetActive(false); // 隐藏原鱼
                 previewFish = Instantiate(fishTruckPrefab, transform);
-                previewFish.transform.localScale = draggingView.fish.inventorySize.To3();
+                var t = draggingView.fish.inventorySize.To3();
+                previewFish.transform.localScale = t;
+                Sequence seq = DOTween.Sequence().SetUpdate(true);
+                seq.Append(previewFish.transform.DOScale(new Vector3(t.x * 1.5f, t.y * 1.5f, t.z * 1.5f), .1f).SetUpdate(true)
+                    .SetEase(Ease.InOutBack));
+                seq.Append(previewFish.transform.DOScale(t, .1f)
+                    .SetUpdate(true)
+                    .SetEase(Ease.InOutBack));
                 previewFish.transform.GetComponent<Image>().color = draggingView.fish.fishColor;
                 previewFish.GetComponent<CanvasGroup>().alpha = 0.5f; // 设置透明度
-                // previewFish.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), .4f).SetEase(Ease.InOutBack, 2);
+
                 previewFishAtTarget = null; // 初始化目标位置预览鱼
             }
         }

@@ -3314,7 +3314,7 @@ MonoBehaviour:
   orderInLayer: 0
   escRemovable: 0
   coverOthersWhenShow: 0
-  fadeType: 0
+  fadeType: 1
   InventoryView: {fileID: 0}
   Viewport: {fileID: 0}
   Capcity: {fileID: 0}
