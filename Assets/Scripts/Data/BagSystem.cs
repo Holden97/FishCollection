@@ -10,7 +10,8 @@ namespace FishCollection
     {
         public Vector2Int bagSize;
         private int occupancyCount;
-
+        private static readonly Vector2Int InvalidPos = new Vector2Int(-1, -1);
+        
         [SerializedDictionary("fishId", "Info")]
         public SerializedDictionary<int, SpecialFishCaught> fishDic;
 
@@ -393,7 +394,7 @@ namespace FishCollection
             foreach (var fish in largeFishes)
             {
                 Vector2Int pos = FindBestFitPosition(fish); // 靠左上
-                if (pos != Vector2Int.zero)
+                if (pos != InvalidPos)
                 {
                     PlaceFish(fish, pos);
                 }
@@ -452,7 +453,7 @@ namespace FishCollection
                 }
             }
 
-            return bestFitX >= 0 && bestFitY >= 0 ? new Vector2Int(bestFitX, bestFitY) : Vector2Int.zero;
+            return bestFitX >= 0 && bestFitY >= 0 ? new Vector2Int(bestFitX, bestFitY) : InvalidPos;
         }
 
         // 小件补洞用：靠近已有占用 → 越紧凑分数越高
