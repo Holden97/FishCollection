@@ -355,5 +355,149 @@ namespace FishCollection
         {
             return occupancyCount;
         }
+
+        // 整理背包：双阶段算法
+        public void OrganizeBag()
+        {
+            // 1. 收集所有鱼
+            List<SpecialFishCaught> fishes = new List<SpecialFishCaught>(fishDic.Values);
+
+            // 2. 清空背包
+            fishDic.Clear();
+            for (int x = 0; x < bagSize.x; x++)
+            {
+                for (int y = 0; y < bagSize.y; y++)
+                {
+                    bagOccupancy[x, y] = -1;
+                }
+            }
+
+            occupancyCount = 0;
+
+            if (fishes.Count == 0)
+                return;
+
+            // 3. 排序
+            fishes.Sort((a, b) =>
+            {
+                int areaA = a.inventorySize.x * a.inventorySize.y;
+                int areaB = b.inventorySize.x * b.inventorySize.y;
+                return areaB.CompareTo(areaA); // 面积大 → 小
+            });
+
+            // 4. 阶段1：先放大件（取前70%）
+            int thresholdIndex = Mathf.CeilToInt(fishes.Count * 0.7f);
+            List<SpecialFishCaught> largeFishes = fishes.GetRange(0, thresholdIndex);
+            List<SpecialFishCaught> smallFishes = fishes.GetRange(thresholdIndex, fishes.Count - thresholdIndex);
+
+            foreach (var fish in largeFishes)
+            {
+                Vector2Int pos = FindBestFitPosition(fish); // 靠左上
+                if (pos != Vector2Int.zero)
+                {
+                    PlaceFish(fish, pos);
+                }
+                else
+                {
+                    Debug.LogWarning($"整理时无法放置大件鱼 {fish.fishId}");
+                }
+            }
+
+            // 5. 阶段2：小件补洞（扫描优先补“靠近已有占用”的空位）
+            foreach (var fish in smallFishes)
+            {
+                Vector2Int pos = FindBestFitPositionForSmall(fish);
+                if (pos != Vector2Int.zero)
+                {
+                    PlaceFish(fish, pos);
+                }
+                else
+                {
+                    Debug.LogWarning($"整理时无法放置小件鱼 {fish.fishId}");
+                }
+            }
+
+            // 6. 通知更新
+            this.EventTrigger(GameEvent.BagChange);
+        }
+
+        private void PlaceFish(SpecialFishCaught fish, Vector2Int pos)
+        {
+            MarkOccupied(fish, pos.x, pos.y, bagOccupancy);
+            fish.topLeftPos = pos;
+            fishDic.Add(fish.fishId, fish);
+            occupancyCount += fish.inventorySize.x * fish.inventorySize.y;
+        }
+
+        private Vector2Int FindBestFitPosition(SpecialFishCaught fish)
+        {
+            int bestFitX = -1;
+            int bestFitY = -1;
+            int bestFitScore = int.MaxValue;
+
+            for (int x = 0; x < bagSize.x; x++)
+            {
+                for (int y = 0; y < bagSize.y; y++)
+                {
+                    if (CanPlaceFishAt(fish, x, y))
+                    {
+                        int score = x * bagSize.y + y; // 行主序，越靠左上分数越小
+                        if (score < bestFitScore)
+                        {
+                            bestFitX = x;
+                            bestFitY = y;
+                            bestFitScore = score;
+                        }
+                    }
+                }
+            }
+
+            return bestFitX >= 0 && bestFitY >= 0 ? new Vector2Int(bestFitX, bestFitY) : Vector2Int.zero;
+        }
+
+        // 小件补洞用：靠近已有占用 → 越紧凑分数越高
+        private Vector2Int FindBestFitPositionForSmall(SpecialFishCaught fish)
+        {
+            int bestFitX = -1;
+            int bestFitY = -1;
+            int bestFitScore = int.MaxValue;
+
+            for (int x = 0; x < bagSize.x; x++)
+            {
+                for (int y = 0; y < bagSize.y; y++)
+                {
+                    if (CanPlaceFishAt(fish, x, y))
+                    {
+                        int score = CountAdjacentOccupied(x, y, fish.inventorySize);
+                        if (score < bestFitScore)
+                        {
+                            bestFitX = x;
+                            bestFitY = y;
+                            bestFitScore = score;
+                        }
+                    }
+                }
+            }
+
+            return bestFitX >= 0 && bestFitY >= 0 ? new Vector2Int(bestFitX, bestFitY) : Vector2Int.zero;
+        }
+
+        // 计算某区域周围已有占用格子数 → 越多越优先放置（更紧凑）
+        private int CountAdjacentOccupied(int startX, int startY, Vector2Int size)
+        {
+            int score = 0;
+            for (int x = startX; x < startX + size.x; x++)
+            {
+                for (int y = startY; y < startY + size.y; y++)
+                {
+                    if (x > 0 && bagOccupancy[x - 1, y] != -1) score++;
+                    if (y > 0 && bagOccupancy[x, y - 1] != -1) score++;
+                    if (x + 1 < bagSize.x && bagOccupancy[x + 1, y] != -1) score++;
+                    if (y + 1 < bagSize.y && bagOccupancy[x, y + 1] != -1) score++;
+                }
+            }
+
+            return -score; // 邻居越多，分数越小，优先放置
+        }
     }
 }

@@ -36,6 +36,7 @@ namespace FishCollection
         {
             base.Initialize();
             fishViews = new SerializedDictionary<SpecialFishCaught, GameObject>();
+            this.OrganizeBtn.onClick.AddListener(OrganizeBag);
         }
 
         public override void UpdateView(object o)
@@ -75,6 +76,11 @@ namespace FishCollection
         }
 
         #region 交互部分
+
+        public void OrganizeBag()
+        {
+            BagSystem.Instance.OrganizeBag();
+        }
 
         public void OnPointerDown(PointerEventData eventData)
         {

@@ -158,8 +158,7 @@ GameObject:
   - component: {fileID: 8878503968891218170}
   - component: {fileID: 3939923889253072774}
   - component: {fileID: 6356841009541027122}
-  - component: {fileID: 467160414956445098}
-  - component: {fileID: 581775168528551561}
+  - component: {fileID: 7943433144898315991}
   m_Layer: 5
   m_Name: MiniMapPanel
   m_TagString: Untagged
@@ -208,7 +207,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &467160414956445098
+--- !u!114 &7943433144898315991
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -225,23 +224,8 @@ MonoBehaviour:
   escRemovable: 0
   coverOthersWhenShow: 0
   fadeType: 0
---- !u!114 &581775168528551561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7323480139442980345}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e568c7f3693bf24285b2d9d0a4f1cd7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  uiLayer: 1
-  orderInLayer: 0
-  escRemovable: 0
-  coverOthersWhenShow: 0
-  fadeType: 0
+  Bg: {fileID: 0}
+  Mask: {fileID: 0}
 --- !u!1 &7813474884896228950
 GameObject:
   m_ObjectHideFlags: 0
