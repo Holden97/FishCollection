@@ -16,6 +16,9 @@ namespace FishCollection
         public Button OrganizeBtn;
         public virtual void OnOrganizeBtnClicked() { }
         public TextMeshProUGUI Text__TMP_;
+        public Button CloseBtn;
+        public virtual void OnCloseBtnClicked() { }
+        public TextMeshProUGUI Text__TMP__2;
 
         public override void Initialize()
         {
@@ -28,6 +31,9 @@ namespace FishCollection
             OrganizeBtn = transform.Find("OrganizeBtn").GetComponent<Button>();
             OrganizeBtn.onClick.AddListener(OnOrganizeBtnClicked);
             Text__TMP_ = transform.Find("OrganizeBtn/Text (TMP)").GetComponent<TextMeshProUGUI>();
+            CloseBtn = transform.Find("CloseBtn").GetComponent<Button>();
+            CloseBtn.onClick.AddListener(OnCloseBtnClicked);
+            Text__TMP__2 = transform.Find("CloseBtn/Text (TMP)").GetComponent<TextMeshProUGUI>();
         }
     }
 }

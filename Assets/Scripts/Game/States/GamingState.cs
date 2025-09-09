@@ -26,6 +26,7 @@ namespace FishCollection
             base.OnStateStart();
             await UIManager.Instance.LoadUIAssetAsync();
             UIManager.Instance.ShowPanel<MiniMapPanel>();
+            UIManager.Instance.ShowPanel<MainGameHudPanel>();
         }
 
         // public void ToggleInventory()

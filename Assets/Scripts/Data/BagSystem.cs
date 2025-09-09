@@ -11,7 +11,7 @@ namespace FishCollection
         public Vector2Int bagSize;
         private int occupancyCount;
         private static readonly Vector2Int InvalidPos = new Vector2Int(-1, -1);
-        
+
         [SerializedDictionary("fishId", "Info")]
         public SerializedDictionary<int, SpecialFishCaught> fishDic;
 
@@ -38,9 +38,14 @@ namespace FishCollection
 
         public void AddFish(SpecialFish fish)
         {
+            AddFishToBag(fish);
+        }
+
+        private bool AddFishToBag(SpecialFish fish)
+        {
             if (fish == null || fish.InventoryGridSize.x <= 0 || fish.InventoryGridSize.y <= 0)
             {
-                return; // 鱼无效或不需要空间
+                return false;
             }
 
             // 找到足够的连续空闲格子
@@ -56,11 +61,14 @@ namespace FishCollection
                         // 将鱼添加到列表中
                         fishDic.Add(fish.specialFishId, new SpecialFishCaught(fish, new Vector2Int(x, y)));
                         this.EventTrigger(GameEvent.BagChange);
+                        this.EventTrigger(GameEvent.SpecialFishEaten, fish);
                         occupancyCount += fish.InventoryGridSize.x * fish.InventoryGridSize.y;
-                        return;
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         public bool RemoveFish(SpecialFishCaught fish)

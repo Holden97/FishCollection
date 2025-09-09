@@ -19,6 +19,11 @@ MonoBehaviour:
     fadeType: 0
     orderInLayer: 0
     ecsRemovable: 0
+  - name: MainGameHudPanel
+    uiType: 1
+    fadeType: 0
+    orderInLayer: 0
+    ecsRemovable: 0
   - name: MiniMapPanel
     uiType: 1
     fadeType: 0

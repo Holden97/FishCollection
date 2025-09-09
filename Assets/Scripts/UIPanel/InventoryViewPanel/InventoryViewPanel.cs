@@ -5,6 +5,7 @@ using AYellowpaper.SerializedCollections;
 using CodiceApp.EventTracking.Plastic;
 using UnityEngine;
 using CommonBase;
+using DG.Tweening;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -37,6 +38,7 @@ namespace FishCollection
             base.Initialize();
             fishViews = new SerializedDictionary<SpecialFishCaught, GameObject>();
             this.OrganizeBtn.onClick.AddListener(OrganizeBag);
+            this.CloseBtn.onClick.AddListener(Close);
         }
 
         public override void UpdateView(object o)
@@ -110,6 +112,7 @@ namespace FishCollection
                 previewFish.transform.localScale = draggingView.fish.inventorySize.To3();
                 previewFish.transform.GetComponent<Image>().color = draggingView.fish.fishColor;
                 previewFish.GetComponent<CanvasGroup>().alpha = 0.5f; // 设置透明度
+                // previewFish.transform.DOScale(new Vector3(0.8f, 0.8f, 0.8f), .4f).SetEase(Ease.InOutBack, 2);
                 previewFishAtTarget = null; // 初始化目标位置预览鱼
             }
         }
